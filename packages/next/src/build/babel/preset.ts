@@ -232,6 +232,9 @@ export default (
     }
   }
 
+  const runtimeModuleName = isBabelLoader
+    ? 'next/dist/compiled/@babel/runtime'
+    : null
   return {
     sourceType: 'unambiguous',
     presets: [
@@ -299,13 +302,13 @@ export default (
           helpers: true,
           regenerator: true,
           useESModules: supportsESM && presetEnvConfig.modules !== 'commonjs',
-          absoluteRuntime: isBabelLoader
-            ? dirname(
-                require.resolve(
-                  'next/dist/compiled/@babel/runtime/package.json'
-                )
-              )
-            : undefined,
+          absoluteRuntime:
+            runtimeModuleName != null
+              ? dirname(require.resolve(`${runtimeModuleName}/package.json`))
+              : undefined,
+          // regenerator needs `moduleName` to be set in addition to
+          // `absoluteRuntime`.
+          moduleName: runtimeModuleName,
           ...options['transform-runtime'],
         },
       ],
